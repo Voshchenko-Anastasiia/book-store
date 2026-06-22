@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+// requirement: Spring Data JPA - repositories & database mapping setup
 @Data
 @Entity
 @NoArgsConstructor

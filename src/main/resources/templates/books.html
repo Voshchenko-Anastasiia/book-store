@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{books.title}">Book Catalog</title>
+</head>
+<body>
+
+<div>
+    <span th:text="#{language.label}">Language:</span>
+    <a th:href="@{/books(page=${bookPage.number}, lang='en')}">English</a> |
+    <a th:href="@{/books(page=${bookPage.number}, lang='uk')}">Ukrainian</a>
+</div>
+
+<nav>
+    <a th:href="@{/basket}" th:text="#{nav.viewBasket}">View My Basket</a>
+</nav>
+
+<h1 th:text="#{books.title}">Books Catalog</h1>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit" th:text="#{logout.button}">Logout</button>
+</form>
+
+<br>
+
+<div sec:authorize="hasRole('EMPLOYEE')">
+    <a href="/books/add" th:text="#{books.add}">Add New Book</a>
+</div>
+
+<br>
+
+<table>
+    <thead>
+    <tr>
+        <th th:text="#{books.name}">Name</th>
+        <th th:text="#{books.author}">Author</th>
+        <th th:text="#{books.price}">Price</th>
+        <th th:text="#{books.actions}">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${bookPage.content}">
+        <td th:text="${book.name}">Name</td>
+        <td th:text="${book.author}">Author</td>
+        <td th:text="${book.price}">Price</td>
+        <td>
+            <a th:href="@{/books/{id}(id=${book.id})}" th:text="#{books.view}">View</a>
+
+            <form sec:authorize="hasRole('EMPLOYEE')"
+                  th:action="@{/books/delete/{id}(id=${book.id})}"
+                  method="post" style="display:inline;">
+                <button type="submit" th:text="#{books.delete}">Delete</button>
+            </form>
+
+            <form th:action="@{/basket/add}" method="post" style="display:inline;">
+                <input type="hidden" name="bookId" th:value="${book.id}" />
+                <button type="submit" th:text="#{button.addToBasket}">Add to Basket</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div>
+    <a th:if="${bookPage.number > 0}"
+       th:href="@{/books(page=0, lang=${#locale.language})}">« <span th:text="#{pagination.first}">First</span></a>
+
+    <a th:if="${bookPage.hasPrevious()}"
+       th:href="@{/books(page=${bookPage.number - 1}, lang=${#locale.language})}" th:text="#{pagination.previous}">Previous</a>
+
+    <span th:text="#{pagination.info(${bookPage.number + 1}, ${bookPage.totalPages})}"></span>
+
+    <a th:if="${bookPage.hasNext()}"
+       th:href="@{/books(page=${bookPage.number + 1}, lang=${#locale.language})}" th:text="#{pagination.next}">Next</a>
+
+    <a th:if="${bookPage.number < bookPage.totalPages - 1}"
+       th:href="@{/books(page=${bookPage.totalPages - 1}, lang=${#locale.language})}"><span th:text="#{pagination.last}">Last</span> »</a>
+</div>
+
+</body>
+</html>

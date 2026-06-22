@@ -1,5 +1,10 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/users/employees")
 public class EmployeeController {
-    // TODO Place your code here
+
 }

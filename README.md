@@ -1,161 +1,79 @@
-# Book Store. Spring Project
+GENERAL REQUIREMENTS FOR ALL PROJECTS
+PRECONDITION: Mandatory passing of tests in Autocode according to the project
+description.
+Core Requirements
+It is necessary to develop a Spring Boot application with a Front-End part, in which it
+is necessary:
+➢ to use:
+1. Spring Data JPA
+- repositories
+- implementation of custom queries
+2. Spring Security
+- authentication strategies (In-Memory Authentication, Database-backed Authentication)
+- authorization & Access Control (Role-based access control, Method-level security, URL-based
+  security)
+- security implementation (Enforce strong password policies)
+- security implementation (Enable/Disable CSRF protection, Disable exposing stack traces & detailed
+  error messages)
+3. DTOs (Data Transfer Objects)
+- completeness depends on domain
+4. SQL Scripts for Initial Data
+- script, without using ConsoleRunner
+  ➢ to implement:
+5. UI internalization (English and local language)
+- interface coverage in different languages
+- error messages display considering the interface language
+6. Data Validation
+- implementation of validation in Controllers
+- implementation of DTO (validation rules, correctness and data constraints)
+- implementation of custom validation rules
+- highlighting of validation errors by form fields
+7. Exception Handling
+- implementation of custom exceptions (if there is a need for specific handling or detailing of system
+  exceptions)
+- implementation of a global exception handler
+- error page setup
+8. Logging (business logic events, errors, security events)
+- implementation of messages of various levels, including Debug
+9. Database Configuration (Embedded H2 or similar)
+- implementation for testing stage - in memory
+- implementation for production - any not in memory
+10. Unit Testing (Cover Services)
+- maximum code coverage with tests
+11. Order Management
+- implementation of functional requirements
+  Nice to Have (to implement):
+1. Searching, Pagination & Sorting
+2. Stateless authentication (JWT-based) to avoid session management issues
+3. Use BCrypt for password hashing (BCryptPasswordEncoder)
+4. Unit Testing (Cover Controllers)
 
-The purpose of this task is to check your knowledge and understanding in Java and Spring.
-
-Duration: **15** hours
-
-## Description
-
-Your objective is to develop a "Book Store Service" following the MVC pattern.
-
-> Project may have two main roles of authority: customer and employee.
-
-The project structure is already set up, with essential classes waiting for implementation in their respective folders.
-Your project is organized into several packages. Here's a brief overview of each:
-
-### Packages Overview
-
-#### `conf`
-
-- Houses all configuration classes.
-
-#### `controller`
-
-- Contains controller files.
-
-#### `dto`
-
-- Contains DTO files.
-
-#### `model`
-
-- Contains all model classes.
-
-#### `exception`
-
-- Contains custom user exception files.
-
-#### `repo`
-
-- Contains repository files.
-
-#### `service`
-
-- Includes interfaces with declared methods for all services.
-
-- `impl`: Encompasses implementations of declared services.
-
-The class diagram of the Domain model is shown in the figure below:
-
-<img src="img/Diagram.png" alt="DTO" width="1000"/>
-
-### Permissions
-
-> For Any Registered Users
-
-- Access a list of available books.
-- View detailed information about any book.
-- Edit personal information and view user profile.
-
-> For Employees
-
-- Add, edit, or delete books from the list.
-- Confirm orders placed by customers.
-- Block or unblock customer accounts.
-- Access a list of registered customers.
-
-> For Customers
-
-- Add books to the basket for purchase.
-- Delete their account.
-- Submit orders for purchase.
-
-### Services
-
-Below is a list of available services with corresponding methods for implementation.
-
-> Note: You can add your own methods to existing services, as well as create additional services.
-
-#### OrderService
-
-* `getAllOrdersByClient(email: String)`
-  Retrieves a list of all orders by client's email placed in the system.
-* `getAllOrdersByEmployee(email: String)`
-  Retrieves a list of all orders by employee's email placed in the system.
-* `addOrder(order: OrderDTO)`
-  Adds a new order to the system, incorporating the provided order details.
-
-#### EmployeeService
-
-* `getAllEmployees()`
-  Retrieves a list of all employees registered in the system.
-* `getEmployeeByEmail(email: String)`
-  Fetches details of a specific employee based on their email.
-* `updateEmployeeByEmail(email: String, employee: EmployeeDTO)`
-  Updates the information of an existing employee identified by their email with the provided details.
-* `deleteEmployeeByEmail(email: String)`
-  Removes an employee from the system based on their email.
-* `addEmployee(employee: EmployeeDTO)`
-  Registers a new employee in the system with the provided details.
-
-#### ClientService
-
-* `getAllClients()`
-  Retrieves a list of all clients (customers) registered in the system.
-* `getClientByEmail(email: String)`
-  Fetches details of a specific client based on their email.
-* `updateClientByEmail(email: String, client: ClientDTO)`
-  Updates the information of an existing client identified by their email with the provided details.
-* `deleteClientByEmail(email: String)`
-  Removes a client from the system based on their email.
-* `addClient(client: ClientDTO)`
-  Registers a new client in the system with the provided details.
-
-#### BookService
-
-* `getAllBooks()`
-  Retrieves a list of all books available in the store.
-* `getBookByName(name: String)`
-  Fetches details of a specific book based on its name.
-* `updateBookByName(name: String, book: BookDTO)`
-  Updates the information of an existing book identified by its name with the provided details.
-* `deleteBookByName(name: String)`
-  Removes a book from the system based on its name.
-* `addBook(book: BookDTO)`
-  Adds a new book to the system with the provided details.
-
-## Requirements
-
-Ensure implementation of the following:
-
-- `Spring Data JPA` for efficient data management.
--  Incorporate `Spring Security` for robust authentication and authorization.
--  Enable `Internationalization and Localization` to support English and any language you choose.
--  Implement `Validation` for data integrity.
--  Establish `Error handling` for graceful error management.
--  Utilize `DTOs` - data transfer objects structured as illustrated below:
-
-<img src="img/DTO.png" alt="DTO" width="600"/>
-
-## Would be nice
-
-Consider the following additional features:
-
-- Incorporate `Logging` for comprehensive system monitoring.
-- Implement `Pagination and Sorting` for enhanced data presentation.
-
-## Recommendations
-
-> Use wrapper classes (like Long, Integer, etc.) instead of primitive types whenever possible.
-
-- Utilize `Lombok` for streamlined Java code.
-- Use `ModelMapper` for easy mapping between objects.
-- Utilize `Thymeleaf` for HTML templating.
-- Explore the `test` folder to execute provided test cases for your solution.
-- Refer to the `main\resources\sql` folder for SQL scripts to initialize data.
-
-## Special message
-
-- Make the most of the time available.
-  While we understand you may not cover all the points,
-  aim to accomplish as much as possible within the given duration of 15 hours.
+TOOLS & RECOMMENDATIONS (ALL PROJECTS)
+We suggest you use the following tools or frameworks to implement projects:
+1. Lombok
+2. ModelMapper
+3. AOP (Aspect-Oriented Programming) for implementing logging
+4. Thymeleaf or another template engine for the front-end part
+   ➢ Recommended Spring Security Implementations
+1. Authentication Strategies
+   • Use In-Memory Authentication (For quick setup/testing – Already suggested in
+   Appliance Store task.)
+   • Support Database-backed Authentication (Store users in DB via Spring Security &
+   JPA.)
+   • (optional) Use OAuth2 for third-party authentication (Google, Facebook, etc.).
+2. Authorization & Access Control
+   • Role-based access control (RBAC) (ADMIN, EMPLOYEE, CUSTOMER, etc.)
+   • Method-level security (@PreAuthorize, @PostAuthorize, @Secured annotations.)
+   • URL-based security (Define access rules in SecurityFilterChain.)
+   • (optional) Custom security expressions (e.g., Checking ownership of an entity.)
+3. Password Security
+   • Enforce strong password policies (Min length, special characters, etc.)
+   • (optional) Allow password reset functionality (e.g., Email-based recovery.)
+4. Session & Token Management (optional)
+   • Set session timeouts and limits (For non-JWT implementations.)
+   • Implement refresh tokens (For long-lived authentication sessions.)
+5. Security Best Practices
+   • Enable/Disable CSRF protection
+   • Disable exposing stack traces & detailed error messages.
+   • (optional) Use HTTPS for secure communication.
+   • (optional) Limit failed login attempts (Prevent brute-force attacks.)

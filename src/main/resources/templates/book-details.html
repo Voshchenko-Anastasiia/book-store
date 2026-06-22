@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:lang="${#locale.language}" >
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${book.name}">Book Details</title>
+</head>
+<body>
+
+<h1 th:text="${book.name}">Book Name</h1>
+
+<ul>
+    <li><strong th:text="#{details.author}">Author:</strong> <span th:text="${book.author}"></span></li>
+
+    <li><strong th:text="#{details.genre}">Genre:</strong> <span th:text="#{${'genre.' + book.genre}}"></span></li>
+    <li><strong th:text="#{details.ageGroup}">Age Group:</strong> <span th:text="#{${'agegroup.' + book.ageGroup}}"></span></li>
+
+    <li><strong th:text="#{details.price}">Price:</strong> <span th:text="${book.price}"></span></li>
+    <li><strong th:text="#{details.pages}">Pages:</strong> <span th:text="${book.pages}"></span></li>
+
+    <li><strong th:text="#{details.language}">Language:</strong> <span th:text="#{${'language.' + book.language}}"></span></li>
+
+    <li><strong th:text="#{details.pubDate}">Publication Date:</strong> <span th:text="${book.publicationDate}"></span></li>
+</ul>
+
+<h3 th:text="#{details.description}">Description</h3>
+<p th:text="${book.description}"></p>
+
+<h3 th:text="#{details.characteristics}">Characteristics</h3>
+<p th:text="${book.characteristics}"></p>
+
+<form th:action="@{/orders/create}" method="post">
+    <input type="hidden" name="bookId" th:value="${book.id}" />
+
+    <label for="quantity" th:text="#{details.quantity}">Quantity:</label>
+    <input type="number" id="quantity" name="quantity" value="1" min="1" required />
+
+    <button type="submit" th:text="#{button.placeOrder}">Place Order</button>
+</form>
+
+<div sec:authorize="!hasRole('CLIENT')">
+    <p th:text="#{details.loginPrompt}">Please log in as a Client to place an order.</p>
+</div>
+
+<br>
+<a href="/books" th:text="#{button.backToCatalog}">Back to Catalog</a>
+
+</body>
+</html>

@@ -5,10 +5,8 @@ import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import java.util.*;
 
 public interface OrderService {
-
     List<OrderDTO> getOrdersByClient(String clientEmail);
-
     List<OrderDTO> getOrdersByEmployee(String employeeEmail);
-
-    OrderDTO addOrder(OrderDTO order);
+    OrderDTO addOrder(OrderDTO orderDto, String clientEmail);
+    List<OrderDTO> findAllByClient(String clientEmail);
 }

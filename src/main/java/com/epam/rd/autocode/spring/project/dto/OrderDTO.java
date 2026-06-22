@@ -1,7 +1,6 @@
 package com.epam.rd.autocode.spring.project.dto;
 
-import com.epam.rd.autocode.spring.project.model.Client;
-import com.epam.rd.autocode.spring.project.model.Employee;
+import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderDTO{
 
+    private Long id;
     private String clientEmail;
     private String employeeEmail;
     private LocalDateTime orderDate;
-    private BigDecimal price;
+    private BigDecimal totalPrice;
     private List<BookItemDTO> bookItems;
+    private OrderStatus status;
 }

@@ -27,4 +27,7 @@ public class BookItem {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @Column(name = "price_at_purchase", nullable = false)
+    private BigDecimal priceAtPurchase;
 }
