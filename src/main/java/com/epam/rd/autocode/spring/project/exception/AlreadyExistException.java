@@ -1,7 +1,8 @@
 package com.epam.rd.autocode.spring.project.exception;
+import org.springframework.http.HttpStatus;
 
-public class AlreadyExistException extends RuntimeException {
-    public AlreadyExistException(String message) {
-        super(message);
+public class AlreadyExistException extends BaseProjectException {
+    public AlreadyExistException() {
+        super("error.already.exist", null, HttpStatus.CONFLICT);
     }
 }
