@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head th:replace="~{fragments/layout :: head(title='My Orders')}"></head>
+
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+        <main class="col-md-10">
+            <main class="col-md-10">
+                <h2>My Order History</h2>
+                <p th:text="'Orders count: ' + ${#lists.size(orders)}"></p>
+                <div th:if="${#lists.isEmpty(orders)}">
+                    <p>You haven't placed any orders yet.</p>
+                </div>
+
+                <table class="table table-striped" th:if="${!#lists.isEmpty(orders)}">
+                    <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Total Price</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.id}">1</td>
+                        <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">Date</td>
+                        <td th:text="${'$' + order.totalPrice}">0.00</td>
+                        <td th:text="${order.status}">PENDING</td>
+                        <td>
+                            <ul>
+                                <li th:each="item : ${order.bookItems}"
+                                    th:text="${item.bookName + ' (x' + item.quantity + ')'}">Book Name</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </main>        </main>
+    </div>
+</div>
+
+</body>
+</html>

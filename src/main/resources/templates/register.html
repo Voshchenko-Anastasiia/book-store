@@ -1,57 +1,72 @@
 <!DOCTYPE html>
-<html lang="en" th:lang="${#locale.language}" xmlns:th="https://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Register</title>
-    <style>
-        .error-message { color: red; font-size: 0.9em; display: block; margin-top: 2px; }
-        .form-group { margin-bottom: 15px; }
-    </style>
-</head>
-<body>
+<html xmlns:th="https://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments/layout :: head('Sign Up')}"></head>
+<body class="bg-light">
 
-<h2 th:text="#{registration.title}">Create an Account</h2>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<div class="language-switcher">
-    <a th:href="@{/register(lang='en')}">English</a> |
-    <a th:href="@{/register(lang='uk')}">Українська</a>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header text-white text-center py-3" style="background: var(--purple-gradient);">
+                    <h4 class="mb-0 fw-bold">Create Your Account</h4>
+                </div>
+                <div class="card-body p-4 bg-white">
+
+                    <form th:action="@{/register}" th:object="${userDto}" method="post" class="d-flex flex-column gap-3">
+
+                        <div>
+                            <label for="name" class="form-label fw-semibold text-dark">Name</label>
+                            <input type="text" id="name" th:field="*{name}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''"
+                                   placeholder="Your full name">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="form-label fw-semibold text-dark">Email Address</label>
+                            <input type="email" id="email" th:field="*{email}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                   placeholder="name@example.com">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+
+                        <div>
+                            <label for="password" class="form-label fw-semibold text-dark">Password</label>
+                            <input type="password" id="password" th:field="*{password}"
+                                   class="form-control"
+                                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                                   placeholder="Requires upper, lower, number & special char">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        </div>
+
+                        <div>
+                            <label for="role" class="form-label fw-semibold text-dark">Account Type</label>
+                            <select id="role" th:field="*{role}"
+                                    class="form-select"
+                                    th:classappend="${#fields.hasErrors('role')} ? 'is-invalid' : ''">
+                                <option value="" selected>Choose role...</option>
+                                <option value="CLIENT">Client</option>
+                                <option value="EMPLOYEE">Employee</option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
+                        </div>
+
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn text-white fw-bold py-2" style="background-color: var(--purple-primary);">
+                                Sign Up
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<br/>
-
-<form th:action="@{/register}" th:object="${userDto}" method="post">
-
-    <div class="form-group">
-        <label for="name" th:text="#{registration.name}">Name:</label>
-        <input type="text" id="name" th:field="*{name}" />
-        <span class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="email" th:text="#{registration.email}">Email:</label>
-        <input type="text" id="email" th:field="*{email}" />
-        <span class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="password" th:text="#{registration.password}">Password:</label>
-        <input type="password" id="password" th:field="*{password}" />
-        <span class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="role" th:text="#{registration.role}">Account Type:</label>
-        <select id="role" th:field="*{role}">
-            <option value="CLIENT" th:text="#{registration.role.client}">Client</option>
-            <option value="EMPLOYEE" th:text="#{registration.role.employee}">Employee</option>
-        </select>
-        <span class="error-message" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></span>
-    </div>
-
-    <button type="submit" th:text="#{registration.button}">Register</button>
-</form>
-
-<br/>
-<p>Already have an account? <a th:href="@{/login}" th:text="#{login.link}">Login here</a></p>
 
 </body>
 </html>

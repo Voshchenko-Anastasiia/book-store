@@ -4,11 +4,15 @@ import com.epam.rd.autocode.spring.project.model.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 // requirement: Spring Data JPA - repositories setup
 @Repository
-public interface BookRepository extends JpaRepository<Book, Long> {
+public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
 
     // requirement: Spring Data JPA - implementation of custom queries
     // requirement: Nice to Have - Searching, Pagination & Sorting
@@ -16,5 +20,5 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     // requirement: Spring Data JPA - implementation of custom queries
     // requirement: Nice to Have - Searching, Pagination & Sorting by Genre
-    Page<Book> findByGenreIgnoreCase(String genre, Pageable pageable);
-}
+    @Query(value = "SELECT * FROM books ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
+    Optional<Book> findRandomBook();}

@@ -8,6 +8,9 @@ import lombok.Data;
 
 @Data
 public class UserRegistrationDTO {
+
+    private Long id;
+
     @NotBlank(message = "{registration.error.name.empty}")
     @Size(min = 2, max = 50, message = "{registration.error.name.size}")
     private String name;

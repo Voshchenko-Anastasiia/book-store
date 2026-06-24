@@ -5,10 +5,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,6 +19,8 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
@@ -31,43 +36,48 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = null;
 
-        // 1. Extract token
         if (request.getCookies() != null) {
+            logger.debug("Checking cookies for JWT token.");
             for (Cookie cookie : request.getCookies()) {
+                logger.trace(" -> Cookie Name: [{}], Value: [{}]", cookie.getName(), cookie.getValue());
                 if ("jwt".equals(cookie.getName())) {
                     token = cookie.getValue();
                 }
             }
+        } else {
+            logger.debug("No cookies received in this request.");
         }
 
-        System.out.println("\n--- JWT FILTER DEBUG for URL: " + request.getRequestURI() + " ---");
-        System.out.println("1. Token extracted from cookies: " + (token != null ? "YES" : "NO"));
+        logger.debug("1. Token extracted from cookies: {}", (token != null ? "YES" : "NO"));
 
         if (token != null) {
             try {
-                // 2. Validate token
                 boolean isValid = jwtUtils.validateToken(token);
-                System.out.println("2. Is token valid? " + isValid);
+                logger.debug("2. Is token valid? {}", isValid);
 
                 if (isValid) {
-                    // 3. Extract user details
                     String username = jwtUtils.getUsernameFromToken(token);
-                    System.out.println("3. Username extracted: " + username);
+                    logger.debug("3. Username extracted: {}", username);
 
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    System.out.println("4. User authorities loaded: " + userDetails.getAuthorities());
+                    logger.debug("4. User authorities loaded: {}", userDetails.getAuthorities());
 
-                    // 4. Set Context
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                    System.out.println("5. SecurityContext successfully set!");
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null, // No credentials needed, the JWT proved who they are
+                                    userDetails.getAuthorities()
+                            );
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    logger.debug("5. SecurityContext updated successfully for user: {}", username);
                 }
             } catch (Exception e) {
-                System.out.println("X. JWT Exception caught: " + e.getMessage());
+                logger.error("Unexpected error during JWT Validation: {}", e.getMessage(), e);
             }
-        } else {
-            System.out.println("X. Proceeding with EMPTY SecurityContext (Unauthenticated)");
         }
 
         filterChain.doFilter(request, response);

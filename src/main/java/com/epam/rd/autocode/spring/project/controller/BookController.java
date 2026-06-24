@@ -5,10 +5,13 @@ import com.epam.rd.autocode.spring.project.exception.ResourceNotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.service.BookService;
+import com.epam.rd.autocode.spring.project.specification.BookSpecifications;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,27 +24,10 @@ public class BookController {
     private final BookService bookService;
     private final BookRepository bookRepository;
 
-    public BookController(BookService bookService,  BookRepository bookRepository) {
+    public BookController(BookService bookService, BookRepository bookRepository) {
         this.bookService = bookService;
         this.bookRepository = bookRepository;
     }
-
-//    @GetMapping("/books")
-//    public String listBooks(
-//            Model model,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "5") int size) {
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        Page<BookDTO> bookPage = bookService.getAllBooksPaginated(pageable);
-//
-//        model.addAttribute("bookPage", bookPage);
-//        model.addAttribute("currentPage", page);
-//        model.addAttribute("totalPages", bookPage.getTotalPages());
-//
-//        return "books-list";
-//    }
 
     @GetMapping("/books/{id}")
     public String getBookDetails(@PathVariable Long id, Model model) {
@@ -69,7 +55,7 @@ public class BookController {
     }
 
     @GetMapping("/books/add")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
     public String showAddForm(Model model) {
         // requirement: Provide an empty BookDTO container for Thymeleaf form binding
         model.addAttribute("bookDto", new BookDTO());
@@ -77,7 +63,7 @@ public class BookController {
     }
 
     @PostMapping("/books/add")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
     public String addBook(@Valid @ModelAttribute BookDTO bookDto, BindingResult result) {
         if (result.hasErrors()) {
             return "book-form";
@@ -87,31 +73,49 @@ public class BookController {
     }
 
     @PostMapping("/books/delete/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_EMPLOYEE')")
     public String deleteBook(@PathVariable Long id) {
         bookService.deleteById(id);
         return "redirect:/books";
     }
 
-//    @GetMapping("/books")
-//    public String getAllBooksPaginated(@RequestParam(defaultValue = "0") int page, Model model) {
-//        Page<BookDTO> bookPage = bookService.getAllBooksPaginated(PageRequest.of(page, 5));
-//
-//        model.addAttribute("bookPage", bookPage);
-//
-//        return "books-list";
-//    }
-
     @GetMapping("/books")
     public String getAllBooks(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
+
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "author", required = false) String author,
+
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "ASC") String sortDir,
             Model model) {
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Book> bookPage = bookRepository.findAll(pageable);
+        Sort sort = sortDir.equalsIgnoreCase("ASC")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Book> spec = Specification.where(BookSpecifications.hasName(name))
+                .and(BookSpecifications.hasAuthor(author));
+
+        Page<Book> bookPage = bookRepository.findAll(spec, pageable);
 
         model.addAttribute("bookPage", bookPage);
+
+        model.addAttribute("currentName", name);
+        model.addAttribute("currentAuthor", author);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+
         return "books";
+    }
+
+    @GetMapping("/books/lucky")
+    public String getLuckyBook() {
+        return bookRepository.findRandomBook()
+                .map(book -> "redirect:/books/" + book.getId())
+                .orElse("redirect:/books");
     }
 }

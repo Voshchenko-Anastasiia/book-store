@@ -34,7 +34,7 @@ public class LoggingAspect {
             return result;
         } catch (Throwable e) {
             logger.error("Exception in method {}! Message: {}", methodName, e.getMessage());
-            throw e; // re-throw the exception so the app handles it correctly
+            throw e;
         }
     }
 }

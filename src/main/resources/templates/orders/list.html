@@ -1,38 +1,47 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My Orders</title>
-</head>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/layout :: head(title='My Orders')}"></head>
+
 <body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<h1>My Orders</h1>
+<div class="container-fluid">
+    <div class="row">
+        <aside th:replace="~{fragments/layout :: sidebar}"></aside>
 
-<div th:if="${orders.empty}">
-    <p>You haven't placed any orders yet.</p>
+        <main class="col-md-10 p-4">
+            <h2>My Order History</h2>
+            <hr>
+
+            <div th:if="${orders.isEmpty()}">
+                <p class="text-muted">You haven't placed any orders yet.</p>
+            </div>
+
+            <table class="table table-hover" th:unless="${orders.isEmpty()}">
+                <thead class="table-dark">
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date & Time</th>
+                    <th>Status</th>
+                    <th>Total Price</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td th:text="${order.id}">1</td>
+                    <td th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}">Date</td>
+                    <td>
+                                <span class="badge"
+                                      th:classappend="${order.status.name() == 'PENDING' ? 'bg-warning' : 'bg-success'}"
+                                      th:text="${order.status}">PENDING</span>
+                    </td>
+                    <td th:text="${'$' + order.totalPrice}">$0.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
 </div>
-
-<table th:if="${!orders.empty}" border="1">
-    <thead>
-    <tr>
-        <th>Order ID</th>
-        <th>Book Title</th>
-        <th>Quantity</th>
-        <th>Order Date</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="order : ${orders}">
-        <td th:text="${order.id}">1</td>
-        <td th:text="${order.bookTitle}">Book Name</td>
-        <td th:text="${order.quantity}">1</td>
-        <td th:text="${order.orderDate}">2026-06-21</td>
-    </tr>
-    </tbody>
-</table>
-
-<br>
-<a href="/books">Back to Catalog</a>
-
 </body>
 </html>

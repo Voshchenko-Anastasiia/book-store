@@ -2,13 +2,16 @@ package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.LoginRequest;
 import com.epam.rd.autocode.spring.project.security.JwtUtils;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -30,22 +33,30 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-        );
+    public String login(@ModelAttribute LoginRequest loginRequest, Model model, HttpServletResponse response) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
-        String jwt = jwtUtils.generateToken(userDetails);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getEmail());
+            String jwt = jwtUtils.generateToken(userDetails);
 
-        // Add cookie
-        Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+            ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(3600)
+                    .sameSite("Strict")
+                    .build();
 
-        return "redirect:/books";
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+            return "redirect:/books";
+
+        } catch (AuthenticationException e) {
+            model.addAttribute("errorMessage", "Invalid username or password.");
+            return "login";
+        }
     }
-
-
 }

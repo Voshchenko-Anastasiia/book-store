@@ -26,7 +26,6 @@ public class GlobalExceptionHandler {
                                            Model model,
                                            HttpServletResponse response) {
 
-        //using users localee
         String localizedMessage = messageSource.getMessage(ex.getMessageKey(), ex.getArgs(), locale);
 
         logger.warn("Business rule violation [{}]: {}", ex.getHttpStatus(), localizedMessage);

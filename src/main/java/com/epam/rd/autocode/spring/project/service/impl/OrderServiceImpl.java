@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,103 +23,124 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final BookRepository bookRepository;
-    private final ClientRepository clientRepository;
-    private final EmployeeRepository employeeRepository;
+    private final UserRepository userRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository, BookRepository bookRepository, EmployeeRepository employeeRepository, ClientRepository clientRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, BookRepository bookRepository, UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.bookRepository = bookRepository;
-        this.employeeRepository = employeeRepository;
-        this.clientRepository = clientRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public List<OrderDTO> getOrdersByClient(String clientEmail) {
-        return orderRepository.findByClientEmail(clientEmail).stream()
+        User user = userRepository.findByEmail(clientEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + clientEmail));
+
+        return orderRepository.findByUserId(user.getId()).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<OrderDTO> getOrdersByEmployee(String employeeEmail) {
+        User user = userRepository.findByEmail(employeeEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + employeeEmail));
 
-        //bridge
-        Employee employee = employeeRepository.findByEmail(employeeEmail)
-                .orElseThrow(() -> new RuntimeException("Employee not found with email: " + employeeEmail));
-
-        List<Order> orders = orderRepository.findByEmployeeId(employee.getId());
-
-        return orders.stream()
+        return orderRepository.findByUserId(user.getId()).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<OrderDTO> findAllByClient(String clientEmail) {
+        return getOrdersByClient(clientEmail); // Reuse the existing method to avoid duplication
     }
 
     private OrderDTO convertToDto(Order order) {
         OrderDTO dto = new OrderDTO();
         dto.setId(order.getId());
         dto.setOrderDate(order.getOrderDate());
-        dto.setTotalPrice(order.getPrice());
+
+        dto.setTotalPrice(order.getTotalPrice());
         dto.setStatus(order.getStatus());
-        
-        if (order.getBookItems() != null) {
-            List<BookItemDTO> itemDtos = order.getBookItems().stream()
+
+        if (order.getItems() != null) {
+            List<BookItemDTO> itemDtos = order.getItems().stream()
                     .map(this::convertItemToDto)
                     .collect(Collectors.toList());
-            dto.setBookItems(itemDtos);
+            dto.setBookItems(itemDtos); // Keeping the DTO field name the same so we don't break the frontend
         }
         return dto;
     }
 
-    private BookItemDTO convertItemToDto(BookItem item) {
+    private BookItemDTO convertItemToDto(OrderItem item) {
         BookItemDTO dto = new BookItemDTO();
         dto.setBookId(item.getBook().getId());
+        dto.setBookName(item.getBook().getName());
         dto.setQuantity(item.getQuantity());
         return dto;
     }
 
-    public List<OrderDTO> findAllByClient(String clientEmail) {
-        return orderRepository.findByClientEmailCustom(clientEmail)
-                .stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
-
     @Override
     @Transactional
-    public OrderDTO addOrder(OrderDTO orderDto, String clientEmail) {
+    public OrderDTO addOrder(OrderDTO orderDto, String email) {
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(OrderStatus.PENDING);
 
-        BigDecimal runningTotal = BigDecimal.ZERO;
-        List<BookItem> bookItems = new ArrayList<>();
-
+        Map<Long, Integer> consolidatedItems = new HashMap<>();
         for (BookItemDTO dto : orderDto.getBookItems()) {
-            Book book = bookRepository.findById(dto.getBookId())
-                    .orElseThrow(() -> new RuntimeException("Book not found: " + dto.getBookId()));
-
-            BookItem item = new BookItem();
-            item.setBook(book);
-            item.setOrder(order);
-            item.setQuantity(dto.getQuantity());
-
-            BigDecimal itemPrice = book.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity()));
-            item.setPriceAtPurchase(book.getPrice());
-
-            bookItems.add(item);
-
-            runningTotal = runningTotal.add(itemPrice);
+            consolidatedItems.put(
+                    dto.getBookId(),
+                    consolidatedItems.getOrDefault(dto.getBookId(), 0) + dto.getQuantity()
+            );
         }
 
-        order.setBookItems(bookItems);
-        order.setPrice(runningTotal);
+        BigDecimal runningTotal = BigDecimal.ZERO;
+        List<OrderItem> orderItems = new ArrayList<>();
 
-        Client client = clientRepository.findByEmail(clientEmail)
-                .orElseThrow(() -> new RuntimeException("Client not found"));
-        order.setClient(client);
+        for (Map.Entry<Long, Integer> entry : consolidatedItems.entrySet()) {
+            Long bookId = entry.getKey();
+            Integer totalQuantity = entry.getValue();
+
+            Book book = bookRepository.findById(bookId)
+                    .orElseThrow(() -> new RuntimeException("Book not found: " + bookId));
+
+            OrderItem item = new OrderItem();
+            item.setBook(book);
+            item.setOrder(order);
+
+            item.setQuantity(totalQuantity);
+            item.setPrice(book.getPrice());
+
+            BigDecimal itemTotalPrice = book.getPrice().multiply(BigDecimal.valueOf(totalQuantity));
+            runningTotal = runningTotal.add(itemTotalPrice);
+
+            orderItems.add(item);
+        }
+
+        order.setItems(orderItems);
+        order.setTotalPrice(runningTotal);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        order.setUser(user);
 
         Order savedOrder = orderRepository.save(order);
 
         return convertToDto(savedOrder);
+    }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    @Override
+    public void updateStatus(Long id, String status) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + id));
+
+        order.setStatus(OrderStatus.valueOf(status));
+        orderRepository.save(order);
     }
 }

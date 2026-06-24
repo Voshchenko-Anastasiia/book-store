@@ -3,73 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <title>Add Book</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 40px;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        h2 { text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="number"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+        }
+        .error { color: red; font-size: 0.9em; margin-top: 5px; }
+        .actions { margin-top: 20px; text-align: right; }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        a { text-decoration: none; color: #666; margin-right: 15px; }
+    </style>
 </head>
 <body>
 
-<h2>Add a New Book</h2>
+<div class="container">
+    <h2>Add a New Book</h2>
 
-<form th:action="@{/books/add}" th:object="${bookDto}" method="post">
+    <form th:action="@{/books/add}" th:object="${bookDto}" method="post">
 
-    <div>
-        <label for="name">Book Title:</label><br/>
-        <input type="text" id="name" th:field="*{name}"/>
-        <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red;"></span>
-    </div><br/>
+        <div class="form-group">
+            <label for="name">Book Title:</label>
+            <input type="text" id="name" th:field="*{name}"/>
+            <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
 
-    <div>
-        <label for="author">Author:</label><br/>
-        <input type="text" id="author" th:field="*{author}"/>
-        <span th:if="${#fields.hasErrors('author')}" th:errors="*{author}" style="color:red;"></span>
-    </div><br/>
+        <div class="form-group">
+            <label for="author">Author:</label>
+            <input type="text" id="author" th:field="*{author}"/>
+            <div class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
+        </div>
 
-    <div>
-        <label for="genre">Genre:</label><br/>
-        <input type="text" id="genre" th:field="*{genre}"/>
-        <span th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}" style="color:red;"></span>
-    </div><br/>
+        <div class="form-group">
+            <label for="genre">Genre:</label>
+            <input type="text" id="genre" th:field="*{genre}"/>
+            <div class="error" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></div>
+        </div>
 
-    <div>
-        <label for="price">Price:</label><br/>
-        <input type="number" step="0.01" id="price" th:field="*{price}"/>
-        <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}" style="color:red;"></span>
-    </div><br/>
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" step="0.01" id="price" th:field="*{price}"/>
+            <div class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+        </div>
 
-    <div>
-        <label for="ageGroup">Target Age Group:</label><br/>
-        <select id="ageGroup" th:field="*{ageGroup}">
-            <option th:each="age : ${T(com.epam.rd.autocode.spring.project.model.enums.AgeGroup).values()}"
-                    th:value="${age}" th:text="${age}"></option>
-        </select>
-    </div><br/>
+        <div class="form-group">
+            <label for="ageGroup">Target Age Group:</label>
+            <select id="ageGroup" th:field="*{ageGroup}">
+                <option th:each="age : ${T(com.epam.rd.autocode.spring.project.model.enums.AgeGroup).values()}"
+                        th:value="${age}" th:text="${age}"></option>
+            </select>
+        </div>
 
-    <div>
-        <label for="language">Language:</label><br/>
-        <select id="language" th:field="*{language}">
-            <option th:each="lang : ${T(com.epam.rd.autocode.spring.project.model.enums.Language).values()}"
-                    th:value="${lang}" th:text="${lang}"></option>
-        </select>
-    </div><br/>
+        <div class="form-group">
+            <label for="language">Language:</label>
+            <select id="language" th:field="*{language}">
+                <option th:each="lang : ${T(com.epam.rd.autocode.spring.project.model.enums.Language).values()}"
+                        th:value="${lang}" th:text="${lang}"></option>
+            </select>
+        </div>
 
-    <div>
-        <label for="publicationDate">Publication Date:</label><br/>
-        <input type="date" id="publicationDate" th:field="*{publicationDate}"/>
-    </div><br/>
+        <div class="form-group">
+            <label for="publicationDate">Publication Date:</label>
+            <input type="date" id="publicationDate" th:field="*{publicationDate}"/>
+        </div>
 
-    <div>
-        <label for="pages">Total Pages:</label><br/>
-        <input type="number" id="pages" th:field="*{pages}"/>
-    </div><br/>
+        <div class="form-group">
+            <label for="pages">Total Pages:</label>
+            <input type="number" id="pages" th:field="*{pages}"/>
+        </div>
 
-    <div>
-        <label for="description">Description:</label><br/>
-        <textarea id="description" th:field="*{description}" rows="3" cols="30"></textarea>
-    </div><br/>
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" th:field="*{description}" rows="3"></textarea>
+        </div>
 
-    <div>
-        <a th:href="@{/books}">Cancel</a>
-        <button type="submit">Save Book</button>
-    </div>
-</form>
+        <div class="actions">
+            <a th:href="@{/books}">Cancel</a>
+            <button type="submit">Save Book</button>
+        </div>
+    </form>
+</div>
 
 </body>
 </html>

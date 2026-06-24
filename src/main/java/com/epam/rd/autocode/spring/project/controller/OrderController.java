@@ -29,32 +29,10 @@ public class OrderController {
         return "orders/list";
     }
 
-    @PostMapping("/create")
-    @PreAuthorize("hasRole('CLIENT')")
-    public String createOrder(HttpSession session, Principal principal) {
-
-        List<BookItemDTO> basketItems = (List<BookItemDTO>) session.getAttribute("BASKET");
-
-        if (basketItems == null || basketItems.isEmpty()) {
-            return "redirect:/basket?error=empty";
-        }
-
-        OrderDTO orderDto = new OrderDTO();
-        orderDto.setBookItems(basketItems);
-        orderDto.setClientEmail(principal.getName());
-
-        orderService.addOrder(orderDto, principal.getName());
-        System.out.println("DEBUG: Order service called successfully.");
-
-        session.removeAttribute("BASKET");
-
-        return "redirect:/orders/list";
-    }
-
-    @GetMapping("/orders")
+    @GetMapping("/all")
+    @PreAuthorize("hasAuthority('EMPLOYEE') or hasAuthority('ADMIN')")
     public String showOrders(Model model, Principal principal) {
-        model.addAttribute("orders", orderService.getOrdersByClient(principal.getName()));
-
+        model.addAttribute("orders", orderService.getOrdersByEmployee(principal.getName()));
         return "orders";
     }
 }

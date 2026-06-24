@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(title='Manage Users')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <aside th:replace="~{fragments/layout :: admin-sidebar}"></aside>
+
+        <main class="col-md-10 p-4">
+            <h2>User Management</h2>
+            <hr>
+
+            <table class="table table-hover mt-4">
+                <thead class="table-dark">
+                <tr>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.email}">user@example.com</td>
+                    <td th:text="${user.name}">John Doe</td>
+                    <td th:text="${user.role}">CLIENT</td>
+                    <td>
+                        <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+</body>
+</html>

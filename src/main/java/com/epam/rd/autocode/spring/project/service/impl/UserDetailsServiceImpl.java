@@ -2,15 +2,10 @@ package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.service.UserService;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-import java.util.Collections;
 
 // requirement: Spring Security - authentication strategies (Database-backed Authentication)
 @Service
@@ -22,30 +17,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         this.userService = userService;
     }
 
-//    @Override
-//    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-//        User user = userService.getUserByEmail(email)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-//
-//        // requirement: Authorization & Access Control - Role-based access control mapping
-//        // Use the safe proxy-resistant method to pull roles
-//        return org.springframework.security.core.userdetails.User.builder()
-//                .username(user.getEmail())
-//                .password(user.getPassword())
-//                .roles(user.getRoleName())
-//                .build();
-//    }
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userService.getUserByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
-        String role = user.getRole();
-        if (role != null && !role.startsWith("ROLE_")) {
-            role = "ROLE_" + role;
-        }
-
         // requirement: Authorization & Access Control - Role-based access control mapping
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

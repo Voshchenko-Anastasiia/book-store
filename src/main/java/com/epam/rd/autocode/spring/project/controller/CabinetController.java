@@ -4,10 +4,12 @@ import com.epam.rd.autocode.spring.project.service.OrderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 
 @Controller
+@RequestMapping("/cabinet")
 public class CabinetController {
     private final OrderService orderService;
 
@@ -15,15 +17,14 @@ public class CabinetController {
         this.orderService = orderService;
     }
 
-    @GetMapping("/my-orders")
+    @GetMapping
+    public String showDashboard(Principal principal) {
+        return "cabinet/dashboard";
+    }
+
+    @GetMapping("/orders")
     public String getMyOrders(Principal principal, Model model) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-
-        String email = principal.getName();
-        model.addAttribute("orders", orderService.getOrdersByClient(email));
-
-        return "cabinet";
+        model.addAttribute("orders", orderService.getOrdersByClient(principal.getName()));
+        return "cabinet/orders";
     }
 }

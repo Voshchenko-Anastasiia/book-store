@@ -1,50 +1,65 @@
 <!DOCTYPE html>
 <html xmlns:th="https://www.thymeleaf.org"
       xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
-      th:lang="${#locale.language}" >
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${book.name}">Book Details</title>
-</head>
-<body>
+      th:lang="${#locale.language}">
 
-<h1 th:text="${book.name}">Book Name</h1>
+<head th:replace="~{fragments/layout :: head(#{books.view})}"></head>
+<body class="bg-light">
 
-<ul>
-    <li><strong th:text="#{details.author}">Author:</strong> <span th:text="${book.author}"></span></li>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <li><strong th:text="#{details.genre}">Genre:</strong> <span th:text="#{${'genre.' + book.genre}}"></span></li>
-    <li><strong th:text="#{details.ageGroup}">Age Group:</strong> <span th:text="#{${'agegroup.' + book.ageGroup}}"></span></li>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-3">
 
-    <li><strong th:text="#{details.price}">Price:</strong> <span th:text="${book.price}"></span></li>
-    <li><strong th:text="#{details.pages}">Pages:</strong> <span th:text="${book.pages}"></span></li>
+                <div class="card-header text-white py-3" style="background: var(--purple-gradient);">
+                    <h2 class="mb-0 fw-bold" th:text="${book.name}">Book Title</h2>
+                </div>
 
-    <li><strong th:text="#{details.language}">Language:</strong> <span th:text="#{${'language.' + book.language}}"></span></li>
+                <div class="card-body p-4 bg-white">
+                    <div class="mb-3 pb-2 border-bottom">
+                        <span class="text-muted small d-block uppercase fw-bold" th:text="#{books.author}">Author</span>
+                        <span class="fs-5 fw-semibold text-dark" th:text="${book.author}">Author Name</span>
+                    </div>
 
-    <li><strong th:text="#{details.pubDate}">Publication Date:</strong> <span th:text="${book.publicationDate}"></span></li>
-</ul>
+                    <div class="mb-3 pb-2 border-bottom">
+                        <span class="text-muted small d-block uppercase fw-bold">Genre</span>
+                        <span class="fs-6 text-dark" th:text="${book.genre}">Genre Type</span>
+                    </div>
 
-<h3 th:text="#{details.description}">Description</h3>
-<p th:text="${book.description}"></p>
+                    <div class="mb-3 pb-2 border-bottom">
+                        <span class="text-muted small d-block uppercase fw-bold" th:text="#{books.price}">Price</span>
+                        <span class="fs-5 fw-bold text-success">$<span th:text="${book.price}">0.00</span></span>
+                    </div>
 
-<h3 th:text="#{details.characteristics}">Characteristics</h3>
-<p th:text="${book.characteristics}"></p>
+                    <div class="mb-3 pb-2 border-bottom">
+                        <span class="text-muted small d-block uppercase fw-bold">Pages</span>
+                        <span class="fs-6 text-dark" th:text="${book.pages}">0</span>
+                    </div>
 
-<form th:action="@{/orders/create}" method="post">
-    <input type="hidden" name="bookId" th:value="${book.id}" />
+                    <div class="mb-4">
+                        <span class="text-muted small d-block uppercase fw-bold">Description</span>
+                        <p class="text-secondary mt-1 lh-base" th:text="${book.description}">Book description text goes here...</p>
+                    </div>
 
-    <label for="quantity" th:text="#{details.quantity}">Quantity:</label>
-    <input type="number" id="quantity" name="quantity" value="1" min="1" required />
+                    <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-4">
+                        <a href="/books" class="btn btn-outline-secondary" th:text="#{filter.reset}">Back to Books</a>
 
-    <button type="submit" th:text="#{button.placeOrder}">Place Order</button>
-</form>
+                        <form th:action="@{/basket/add}" method="post" class="d-flex gap-2">
+                            <input type="hidden" name="bookId" th:value="${book.id}" />
+                            <input type="number" name="quantity" value="1" min="1" max="10" class="form-control form-control-sm" style="width: 70px;">
+                            <button type="submit" class="btn text-white fw-bold px-4" style="background-color: var(--purple-primary);">
+                                Add to Basket
+                            </button>
+                        </form>
+                    </div>
 
-<div sec:authorize="!hasRole('CLIENT')">
-    <p th:text="#{details.loginPrompt}">Please log in as a Client to place an order.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<br>
-<a href="/books" th:text="#{button.backToCatalog}">Back to Catalog</a>
 
 </body>
 </html>

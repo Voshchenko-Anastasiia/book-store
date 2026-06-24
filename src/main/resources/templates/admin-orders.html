@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security"
+      th:lang="${#locale.language}">
+
+<head th:replace="~{fragments/layout :: head('Admin: Order Management')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+
+        <div class="col-md-2" sec:authorize="hasRole('ADMIN')">
+            <div th:replace="~{fragments/layout :: admin-sidebar}"></div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header text-white py-3" style="background: var(--purple-gradient);">
+                    <h3 class="mb-0 fw-bold">Manage Orders</h3>
+                </div>
+
+                <div class="card-body p-4 bg-white">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light text-uppercase small text-muted">
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Current Status</th>
+                            <th>Update Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="order : ${orders}">
+                            <td class="fw-bold" th:text="${order.id}">1</td>
+                            <td th:text="${order.user.email}">user@email.com</td>
+                            <td th:text="${'$' + order.totalPrice}">$0.00</td>
+
+                            <td>
+                                <span class="badge"
+                                      th:text="${order.status}"
+                                      th:classappend="${order.status.name() == 'DELIVERED' ? 'bg-success' : (order.status.name() == 'PENDING' ? 'bg-warning' : 'bg-primary')}">
+                                    PENDING
+                                </span>
+                            </td>
+
+                            <td>
+                                <form th:action="@{/admin/orders/{id}/update(id=${order.id})}" method="post" class="d-flex gap-2">
+                                    <select name="status" class="form-select form-select-sm" style="width: auto;">
+                                        <option value="PENDING"    th:selected="${order.status.name() == 'PENDING'}">Pending</option>
+                                        <option value="PROCESSING" th:selected="${order.status.name() == 'PROCESSING'}">Processing</option>
+                                        <option value="SHIPPED"    th:selected="${order.status.name() == 'SHIPPED'}">Shipped</option>
+                                        <option value="DELIVERED"  th:selected="${order.status.name() == 'DELIVERED'}">Delivered</option>
+                                        <option value="CANCELLED"  th:selected="${order.status.name() == 'CANCELLED'}">Cancelled</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-dark">Update</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
