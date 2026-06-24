@@ -14,8 +14,6 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
 
-    // requirement: Spring Data JPA - implementation of custom queries
-    // requirement: Nice to Have - Searching, Pagination & Sorting
     Page<Book> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     // requirement: Spring Data JPA - implementation of custom queries

@@ -3,9 +3,11 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.dto.UserRegistrationDTO;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import com.epam.rd.autocode.spring.project.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -41,7 +43,12 @@ public class AdminController {
 
     @PostMapping("/users/create-employee")
     @PreAuthorize("hasRole('ADMIN')")
-    public String createEmployee(@ModelAttribute("userDTO") UserRegistrationDTO userDTO) {
+    public String createEmployee(@Valid @ModelAttribute("userDTO") UserRegistrationDTO userDTO, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            return "create-employee";
+        }
+
         userDTO.setRole("EMPLOYEE");
         userService.registerNewUser(userDTO);
         return "redirect:/admin/users";

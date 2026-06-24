@@ -39,9 +39,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerNewUser(UserRegistrationDTO dto) {
-        if (getUserByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("An account with this email already exists.");
-        }
+//        if (getUserByEmail(dto.getEmail()).isPresent()) {
+//            throw new IllegalArgumentException("An account with this email already exists.");
+//        }
 
         User user;
         String cleanRole = dto.getRole().toUpperCase().replace("ROLE_", "");

@@ -1,68 +1,86 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin - Register Employee</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(title='Register Employee')}"></head>
+<body>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Register New Employee</h4>
-                </div>
-                <div class="card-body">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-                    <form th:action="@{/admin/users/create-employee}" th:object="${userDTO}" method="post">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Full Name</label>
-                            <input type="text"
-                                   th:field="*{name}"
-                                   id="name"
-                                   class="form-control"
-                                   placeholder="John Doe"
-                                   required />
+<div class="container-fluid">
+    <div class="row">
+
+        <aside th:replace="~{fragments/layout :: admin-sidebar}"></aside>
+
+        <main class="col-md-10 p-4">
+            <div class="mb-3">
+                <h2>Register New Employee</h2>
+                <p class="text-muted">Fill out the fields below to provision a new workspace account.</p>
+            </div>
+            <hr>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+
+                            <form th:action="@{/admin/users/create-employee}" th:object="${userDTO}" method="post">
+
+                                <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger pb-0">
+                                    <p>Please correct the verification errors highlighted below.</p>
+                                </div>
+
+                                <input type="hidden" name="role" value="EMPLOYEE" />
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <div class="mb-3">
+                                    <label for="name" class="form-label font-weight-bold">Full Name</label>
+                                    <input type="text"
+                                           th:field="*{name}"
+                                           id="name"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                           placeholder="John Doe" />
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="email" class="form-label font-weight-bold">Email Address</label>
+                                    <input type="email"
+                                           th:field="*{email}"
+                                           id="email"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                                           placeholder="employee@company.com" />
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="password" class="form-label font-weight-bold">Temporary Password</label>
+                                    <input type="password"
+                                           th:field="*{password}"
+                                           id="password"
+                                           class="form-control"
+                                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                           placeholder="••••••••" />
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                                </div>
+
+                                <div class="alert alert-info py-2 small" role="alert">
+                                    <strong>Role Assignment Notice:</strong> System sets permissions to <strong>EMPLOYEE</strong> implicitly on submit.
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <a href="/admin/users" class="btn btn-outline-secondary">Cancel</a>
+                                    <button type="submit" class="btn btn-primary">Create Account</button>
+                                </div>
+
+                            </form>
+
                         </div>
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email"
-                                   th:field="*{email}"
-                                   id="email"
-                                   class="form-control"
-                                   placeholder="employee@company.com"
-                                   required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Temporary Password</label>
-                            <input type="password"
-                                   th:field="*{password}"
-                                   id="password"
-                                   class="form-control"
-                                   placeholder="••••••••"
-                                   required />
-                        </div>
-
-                        <div class="alert alert-info py-2 small" role="alert">
-                            <strong>Note:</strong> This user will automatically be assigned the <strong>EMPLOYEE</strong> role upon submission.
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a href="/admin/users" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Create Account</button>
-                        </div>
-
-                    </form>
-
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
+
     </div>
 </div>
-
 </body>
 </html>
