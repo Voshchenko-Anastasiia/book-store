@@ -2,6 +2,8 @@ package com.epam.rd.autocode.spring.project.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,8 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+
     @Value("${app.jwt.secret}")
     private String secret;
 
@@ -21,6 +25,8 @@ public class JwtUtils {
 
     public String generateToken(UserDetails userDetails) {
         String role = userDetails.getAuthorities().iterator().next().getAuthority();
+
+        logger.debug("Generating JWT token for user: {}", userDetails.getUsername());
 
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -53,15 +59,15 @@ public class JwtUtils {
                     .parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SignatureException e) {
-            System.out.println("JWT ERROR: Invalid signature - " + e.getMessage());
+            logger.error("JWT ERROR: Invalid signature - {}", e.getMessage());
         } catch (io.jsonwebtoken.MalformedJwtException e) {
-            System.out.println("JWT ERROR: Malformed token - " + e.getMessage());
+            logger.error("JWT ERROR: Malformed token - {}", e.getMessage());
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
-            System.out.println("JWT ERROR: Token expired - " + e.getMessage());
+            logger.warn("JWT WARN: Token expired - {}", e.getMessage());
         } catch (io.jsonwebtoken.UnsupportedJwtException e) {
-            System.out.println("JWT ERROR: Unsupported token - " + e.getMessage());
+            logger.error("JWT ERROR: Unsupported token - {}", e.getMessage());
         } catch (IllegalArgumentException e) {
-            System.out.println("JWT ERROR: Empty claims - " + e.getMessage());
+            logger.error("JWT ERROR: Empty claims - {}", e.getMessage());
         }
         return false;
     }

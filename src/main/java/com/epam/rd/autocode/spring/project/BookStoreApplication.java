@@ -7,10 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BookStoreApplication {
 
     public static void main(String[] args) {
-        try {
-            SpringApplication.run(BookStoreApplication.class, args);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
+        SpringApplication.run(BookStoreApplication.class, args);
     }
 }
