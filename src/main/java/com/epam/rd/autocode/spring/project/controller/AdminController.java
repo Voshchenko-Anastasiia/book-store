@@ -47,6 +47,13 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
+    @GetMapping("/users/create")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String showCreateEmployeeForm(Model model) {
+        model.addAttribute("userDTO", new UserRegistrationDTO());
+        return "create-employee";
+    }
+
     @PostMapping("/users/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public String deleteUser(@PathVariable Long id) {

@@ -10,7 +10,12 @@
         <aside th:replace="~{fragments/layout :: admin-sidebar}"></aside>
 
         <main class="col-md-10 p-4">
-            <h2>User Management</h2>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>User Management</h2>
+                <a th:href="@{/admin/users/create}" class="btn btn-success">
+                    <i class="bi bi-plus-lg"></i> Create Employee
+                </a>
+            </div>
             <hr>
 
             <table class="table table-hover mt-4">
@@ -28,7 +33,8 @@
                     <td th:text="${user.name}">John Doe</td>
                     <td th:text="${user.role}">CLIENT</td>
                     <td>
-                        <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post">
+                        <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this user?');">
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
                     </td>
