@@ -58,12 +58,14 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                //requirement: security exception handling
                 .exceptionHandling(exception -> exception
                         .accessDeniedPage("/access-denied")
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.sendRedirect("/login");
                         })
                 )
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
