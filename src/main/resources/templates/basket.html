@@ -51,6 +51,7 @@
                         <td class="pt-3 h5 fw-bold text-success" th:text="${'$' + #numbers.formatDecimal(grandTotal, 1, 2)}">$0.00</td>
                         <td></td>
                     </tr>
+                    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
                     </tfoot>
                 </table>
 

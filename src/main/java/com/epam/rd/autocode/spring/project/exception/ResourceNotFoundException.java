@@ -4,6 +4,6 @@ import org.springframework.http.HttpStatus;
 
 public class ResourceNotFoundException extends BaseProjectException {
     public ResourceNotFoundException(String resourceName) {
-        super("error.resource.not.found", new Object[]{resourceName}, HttpStatus.NOT_FOUND);
+        super("error.resource.not.found", HttpStatus.NOT_FOUND, resourceName);
     }
 }

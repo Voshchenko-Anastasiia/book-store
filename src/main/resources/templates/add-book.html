@@ -1,113 +1,90 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Book</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 40px;
-            color: #333;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        h2 { text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="number"], input[type="date"], select, textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; /* Ensures padding doesn't affect width */
-        }
-        .error { color: red; font-size: 0.9em; margin-top: 5px; }
-        .actions { margin-top: 20px; text-align: right; }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover { background-color: #0056b3; }
-        a { text-decoration: none; color: #666; margin-right: 15px; }
-    </style>
-</head>
+<html xmlns:th="https://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:replace="~{fragments/layout :: head(title='Add Book')}"></head>
+
 <body>
 
-<div class="container">
-    <h2>Add a New Book</h2>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-    <form th:action="@{/books/add}" th:object="${bookDto}" method="post">
+<div class="container-fluid">
+    <div class="row">
+        <aside th:replace="~{fragments/layout :: sidebar}"></aside>
 
-        <div class="form-group">
-            <label for="name">Book Title:</label>
-            <input type="text" id="name" th:field="*{name}"/>
-            <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-        </div>
+        <main class="col-md-10 p-4">
+            <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4 text-purple">Add a New Book</h2>
 
-        <div class="form-group">
-            <label for="author">Author:</label>
-            <input type="text" id="author" th:field="*{author}"/>
-            <div class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
-        </div>
+                    <form th:action="@{/books/add}" th:object="${bookDto}" method="post">
 
-        <div class="form-group">
-            <label for="genre">Genre:</label>
-            <input type="text" id="genre" th:field="*{genre}"/>
-            <div class="error" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></div>
-        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-bold">Book Title</label>
+                            <input type="text" id="name" th:field="*{name}" class="form-control" />
+                            <div class="text-danger small" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
 
-        <div class="form-group">
-            <label for="price">Price:</label>
-            <input type="number" step="0.01" id="price" th:field="*{price}"/>
-            <div class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
-        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="author" class="form-label fw-bold">Author</label>
+                                <input type="text" id="author" th:field="*{author}" class="form-control" />
+                                <div class="text-danger small" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="genre" class="form-label fw-bold">Genre</label>
+                                <input type="text" id="genre" th:field="*{genre}" class="form-control" />
+                                <div class="text-danger small" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></div>
+                            </div>
+                        </div>
 
-        <div class="form-group">
-            <label for="ageGroup">Target Age Group:</label>
-            <select id="ageGroup" th:field="*{ageGroup}">
-                <option th:each="age : ${T(com.epam.rd.autocode.spring.project.model.enums.AgeGroup).values()}"
-                        th:value="${age}" th:text="${age}"></option>
-            </select>
-        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label fw-bold">Price</label>
+                                <input type="number" step="0.01" id="price" th:field="*{price}" class="form-control" />
+                                <div class="text-danger small" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pages" class="form-label fw-bold">Pages</label>
+                                <input type="number" id="pages" th:field="*{pages}" class="form-control" />
+                            </div>
+                        </div>
 
-        <div class="form-group">
-            <label for="language">Language:</label>
-            <select id="language" th:field="*{language}">
-                <option th:each="lang : ${T(com.epam.rd.autocode.spring.project.model.enums.Language).values()}"
-                        th:value="${lang}" th:text="${lang}"></option>
-            </select>
-        </div>
+                        <div class="mb-3">
+                            <label for="ageGroup" class="form-label fw-bold">Target Age Group</label>
+                            <select id="ageGroup" th:field="*{ageGroup}" class="form-select">
+                                <option th:each="age : ${T(com.epam.rd.autocode.spring.project.model.enums.AgeGroup).values()}"
+                                        th:value="${age}" th:text="${age}"></option>
+                            </select>
+                        </div>
 
-        <div class="form-group">
-            <label for="publicationDate">Publication Date:</label>
-            <input type="date" id="publicationDate" th:field="*{publicationDate}"/>
-        </div>
+                        <div class="mb-3">
+                            <label for="language" class="form-label fw-bold">Language</label>
+                            <select id="language" th:field="*{language}" class="form-select">
+                                <option th:each="lang : ${T(com.epam.rd.autocode.spring.project.model.enums.Language).values()}"
+                                        th:value="${lang}" th:text="${lang}"></option>
+                            </select>
+                        </div>
 
-        <div class="form-group">
-            <label for="pages">Total Pages:</label>
-            <input type="number" id="pages" th:field="*{pages}"/>
-        </div>
+                        <div class="mb-3">
+                            <label for="publicationDate" class="form-label fw-bold">Publication Date</label>
+                            <input type="date" id="publicationDate" th:field="*{publicationDate}" class="form-control" />
+                        </div>
 
-        <div class="form-group">
-            <label for="description">Description:</label>
-            <textarea id="description" th:field="*{description}" rows="3"></textarea>
-        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">Description</label>
+                            <textarea id="description" th:field="*{description}" class="form-control" rows="3"></textarea>
+                        </div>
 
-        <div class="actions">
-            <a th:href="@{/books}">Cancel</a>
-            <button type="submit">Save Book</button>
-        </div>
-    </form>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a th:href="@{/books}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary" style="background-color: #4A154B; border: none;">Save Book</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
 </div>
 
 </body>

@@ -3,10 +3,13 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
 import com.epam.rd.autocode.spring.project.model.Book;
+import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.service.OrderService;
+import com.epam.rd.autocode.spring.project.service.UserService;
 import jakarta.servlet.http.HttpSession;
 // Added SLF4J imports
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -23,17 +27,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Controller
 public class BasketController {
 
-    private static final Logger logger = LoggerFactory.getLogger(BasketController.class);
-
     private final BookRepository bookRepository;
     private final OrderService orderService;
+    private final UserService userService;
 
-    public BasketController(BookRepository bookRepository, OrderService orderService) {
+    public BasketController(BookRepository bookRepository, OrderService orderService, UserService userService) {
         this.bookRepository = bookRepository;
         this.orderService = orderService;
+        this.userService = userService;
     }
 
     public static class BasketViewItem {
@@ -66,7 +71,7 @@ public class BasketController {
                     BigDecimal itemSubtotal = book.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
                     grandTotal = grandTotal.add(itemSubtotal);
                 } else {
-                    logger.warn("Book with ID {} was in the basket but could not be found in the database.", item.getBookId());
+                    log.warn("Book with ID {} was in the basket but could not be found in the database.", item.getBookId());
                 }
             }
         }
@@ -109,7 +114,7 @@ public class BasketController {
         }
 
         session.setAttribute("basket", basket);
-        logger.debug("Added book ID {} (quantity: {}) to basket.", bookId, quantity); // Optional debug log
+        log.debug("Added book ID {} (quantity: {}) to basket.", bookId, quantity); // Optional debug log
         return "redirect:/books";
     }
 
@@ -120,36 +125,30 @@ public class BasketController {
         if (basket != null && basket.getBookItems() != null) {
             basket.getBookItems().removeIf(item -> item.getBookId().equals(id));
             session.setAttribute("basket", basket);
-            logger.debug("Removed book ID {} from basket.", id); // Optional debug log
+            log.debug("Removed book ID {} from basket.", id); // Optional debug log
         }
         return "redirect:/basket";
     }
 
     @PostMapping("/basket/order")
     @PreAuthorize("hasRole('CLIENT')")
-    public String placeOrder(HttpSession session, Principal principal) {
-        if (principal == null) {
-            logger.warn("Unauthenticated user attempted to place an order.");
-            return "redirect:/login";
-        }
-
+    public String placeOrder(HttpSession session, Principal principal, RedirectAttributes redirectAttributes) {
         OrderDTO basket = (OrderDTO) session.getAttribute("basket");
 
         if (basket == null || basket.getBookItems() == null || basket.getBookItems().isEmpty()) {
-            logger.warn("User {} attempted to place an empty order.", principal.getName());
             return "redirect:/basket?error=empty";
         }
 
         try {
-            logger.info("User {} is attempting to place an order with {} items.", principal.getName(), basket.getBookItems().size());
             orderService.addOrder(basket, principal.getName());
             session.removeAttribute("basket");
-            logger.info("Order placed successfully for user {}.", principal.getName());
-        } catch (Exception e) {
-            logger.error("Failed to place order for user: {}. Error message: {}", principal.getName(), e.getMessage(), e);
-            return "redirect:/basket?error=order_failed";
+            return "redirect:/cabinet/orders?success=order_placed";
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("Insufficient funds")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Insufficient funds! Please top up your wallet.");
+                return "redirect:/basket";
+            }
+            throw e;
         }
-
-        return "redirect:/cabinet/orders";
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')") // Only Admins can enter
+@PreAuthorize("hasRole('ADMIN')") // Secures all methods implicitly
 public class AdminController {
 
     private final OrderService orderService;
@@ -26,7 +26,7 @@ public class AdminController {
     @GetMapping("/orders")
     public String showOrders(Model model) {
         model.addAttribute("orders", orderService.getAllOrders());
-        return "admin-orders";
+        return "admin/orders";
     }
 
     @PostMapping("/orders/{id}/update")
@@ -38,31 +38,29 @@ public class AdminController {
     @GetMapping("/users")
     public String showUsers(Model model) {
         model.addAttribute("users", userService.findAllNonAdminUsers());
-        return "admin-users";
+        return "admin/users";
+    }
+
+    @GetMapping("/users/create")
+    public String showCreateEmployeeForm(Model model) {
+        model.addAttribute("userDto", new UserRegistrationDTO());
+        return "admin/create-employee";
     }
 
     @PostMapping("/users/create-employee")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String createEmployee(@Valid @ModelAttribute("userDTO") UserRegistrationDTO userDTO, BindingResult bindingResult) {
+    public String createEmployee(@Valid @ModelAttribute("userDto") UserRegistrationDTO userDTO,
+                                 BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            return "create-employee";
+            return "admin/create-employee";
         }
 
         userDTO.setRole("EMPLOYEE");
         userService.registerNewUser(userDTO);
-        return "redirect:/admin/users";
-    }
-
-    @GetMapping("/users/create")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String showCreateEmployeeForm(Model model) {
-        model.addAttribute("userDTO", new UserRegistrationDTO());
-        return "create-employee";
+        return "redirect:/admin/users?success";
     }
 
     @PostMapping("/users/delete/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return "redirect:/admin/users";

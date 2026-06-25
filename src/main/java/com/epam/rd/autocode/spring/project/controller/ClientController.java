@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/api/users/employees")
+@RequestMapping("/api/users/clients")
 public class ClientController {
 
 }

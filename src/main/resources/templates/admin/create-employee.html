@@ -22,7 +22,7 @@
                     <div class="card shadow-sm">
                         <div class="card-body">
 
-                            <form th:action="@{/admin/users/create-employee}" th:object="${userDTO}" method="post">
+                            <form th:action="@{/admin/users/create-employee}" th:object="${userDto}" method="post">
 
                                 <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger pb-0">
                                     <p>Please correct the verification errors highlighted below.</p>

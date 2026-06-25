@@ -3,7 +3,7 @@
 
 <head th:replace="~{fragments/layout :: head(title='My Orders')}"></head>
 
-<body>
+<body class="bg-light">
 
 <div th:replace="~{fragments/layout :: navbar}"></div>
 
@@ -11,31 +11,35 @@
     <div class="row">
         <div th:replace="~{fragments/layout :: sidebar}"></div>
 
-        <main class="col-md-10">
-            <main class="col-md-10">
-                <h2>My Order History</h2>
-                <p th:text="'Orders count: ' + ${#lists.size(orders)}"></p>
-                <div th:if="${#lists.isEmpty(orders)}">
-                    <p>You haven't placed any orders yet.</p>
-                </div>
+        <main class="col-md-10 p-4">
+            <h2 class="mb-2" style="color: var(--purple-primary);">My Order History</h2>
+            <p class="text-muted" th:text="'Orders count: ' + ${#lists.size(orders)}"></p>
 
-                <table class="table table-striped" th:if="${!#lists.isEmpty(orders)}">
-                    <thead>
+            <div th:if="${#lists.isEmpty(orders)}" class="alert alert-info border-0 shadow-sm" style="background-color: var(--purple-light); color: var(--purple-primary);">
+                You haven't placed any orders yet.
+            </div>
+
+            <div class="table-responsive shadow-sm" th:if="${!#lists.isEmpty(orders)}" style="border-radius: 12px; overflow: hidden;">
+                <table class="table table-hover table-borderless bg-white mb-0 align-middle">
+                    <thead style="background-color: var(--purple-primary); color: white;">
                     <tr>
-                        <th>Order ID</th>
-                        <th>Date</th>
-                        <th>Total Price</th>
-                        <th>Status</th>
+                        <th class="p-3">Order ID</th>
+                        <th class="p-3">Date</th>
+                        <th class="p-3">Total Price</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">Books Items</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="order : ${orders}">
-                        <td th:text="${order.id}">1</td>
-                        <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">Date</td>
-                        <td th:text="${'$' + order.totalPrice}">0.00</td>
-                        <td th:text="${order.status}">PENDING</td>
-                        <td>
-                            <ul>
+                    <tr th:each="order : ${orders}" class="border-bottom">
+                        <td class="p-3 fw-bold text-muted" th:text="${order.id}">1</td>
+                        <td class="p-3 text-secondary" th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">Date</td>
+                        <td class="p-3 fw-bold text-success" th:text="${'$' + order.totalPrice}">0.00</td>
+                        <td class="p-3">
+                            <span class="badge bg-secondary rounded-pill px-3 py-1" th:text="${order.status}">PENDING</span>
+                        </td>
+                        <td class="p-3">
+                            <ul class="list-unstyled mb-0 text-secondary small">
                                 <li th:each="item : ${order.bookItems}"
                                     th:text="${item.bookName + ' (x' + item.quantity + ')'}">Book Name</li>
                             </ul>
@@ -43,7 +47,8 @@
                     </tr>
                     </tbody>
                 </table>
-            </main>        </main>
+            </div>
+        </main>
     </div>
 </div>
 

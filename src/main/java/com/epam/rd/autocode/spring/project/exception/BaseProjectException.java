@@ -5,18 +5,17 @@ import org.springframework.http.HttpStatus;
 public abstract class BaseProjectException extends RuntimeException {
 
     private final String messageKey;
-    private final Object[] args;
     private final HttpStatus httpStatus;
+    private final Object[] args;
 
-    protected BaseProjectException(String messageKey, Object[] args, HttpStatus httpStatus) {
+    protected BaseProjectException(String messageKey, HttpStatus httpStatus, Object... args) {
         super(messageKey);
         this.messageKey = messageKey;
-        this.args = args;
         this.httpStatus = httpStatus;
+        this.args = args;
     }
 
     public String getMessageKey() { return messageKey; }
-    public Object[] getArgs() { return args; }
     public HttpStatus getHttpStatus() { return httpStatus; }
-
+    public Object[] getArgs() { return args; }
 }

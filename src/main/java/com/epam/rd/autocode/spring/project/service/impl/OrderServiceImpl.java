@@ -80,13 +80,64 @@ public class OrderServiceImpl implements OrderService {
         return dto;
     }
 
+//    @Override
+//    @Transactional
+//    public OrderDTO addOrder(OrderDTO orderDto, String email) {
+//        Order order = new Order();
+//        order.setOrderDate(LocalDateTime.now());
+//        order.setStatus(OrderStatus.PENDING);
+//
+//        Map<Long, Integer> consolidatedItems = new HashMap<>();
+//        for (BookItemDTO dto : orderDto.getBookItems()) {
+//            consolidatedItems.put(
+//                    dto.getBookId(),
+//                    consolidatedItems.getOrDefault(dto.getBookId(), 0) + dto.getQuantity()
+//            );
+//        }
+//
+//        BigDecimal runningTotal = BigDecimal.ZERO;
+//        List<OrderItem> orderItems = new ArrayList<>();
+//
+//        for (Map.Entry<Long, Integer> entry : consolidatedItems.entrySet()) {
+//            Long bookId = entry.getKey();
+//            Integer totalQuantity = entry.getValue();
+//
+//            Book book = bookRepository.findById(bookId)
+//                    .orElseThrow(() -> new RuntimeException("Book not found: " + bookId));
+//
+//            OrderItem item = new OrderItem();
+//            item.setBook(book);
+//            item.setOrder(order);
+//
+//            item.setQuantity(totalQuantity);
+//            item.setPrice(book.getPrice());
+//
+//            BigDecimal itemTotalPrice = book.getPrice().multiply(BigDecimal.valueOf(totalQuantity));
+//            runningTotal = runningTotal.add(itemTotalPrice);
+//
+//            orderItems.add(item);
+//        }
+//
+//        order.setItems(orderItems);
+//        order.setTotalPrice(runningTotal);
+//
+//        User user = userRepository.findByEmail(email)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//        order.setUser(user);
+//
+//        Order savedOrder = orderRepository.save(order);
+//
+//        return convertToDto(savedOrder);
+//    }
+
     @Override
     @Transactional
     public OrderDTO addOrder(OrderDTO orderDto, String email) {
-        Order order = new Order();
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus(OrderStatus.PENDING);
+        // 1. Fetch User early so we can check balance before doing anything else
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
+        // 2. Consolidate items
         Map<Long, Integer> consolidatedItems = new HashMap<>();
         for (BookItemDTO dto : orderDto.getBookItems()) {
             consolidatedItems.put(
@@ -95,6 +146,7 @@ public class OrderServiceImpl implements OrderService {
             );
         }
 
+        // 3. Process books and calculate total
         BigDecimal runningTotal = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
 
@@ -105,25 +157,41 @@ public class OrderServiceImpl implements OrderService {
             Book book = bookRepository.findById(bookId)
                     .orElseThrow(() -> new RuntimeException("Book not found: " + bookId));
 
+            // Create OrderItem
             OrderItem item = new OrderItem();
             item.setBook(book);
-            item.setOrder(order);
-
             item.setQuantity(totalQuantity);
             item.setPrice(book.getPrice());
 
+            // Accumulate Total
             BigDecimal itemTotalPrice = book.getPrice().multiply(BigDecimal.valueOf(totalQuantity));
             runningTotal = runningTotal.add(itemTotalPrice);
 
             orderItems.add(item);
         }
 
+        // 4. VALIDATION: Check for sufficient funds
+        BigDecimal currentBalance = user.getBalance() != null ? user.getBalance() : BigDecimal.ZERO;
+        if (currentBalance.compareTo(runningTotal) < 0) {
+            throw new RuntimeException("Insufficient funds. Required: " + runningTotal + ", Available: " + currentBalance);
+        }
+
+        // 5. Deduct balance and save User
+        user.setBalance(currentBalance.subtract(runningTotal));
+        userRepository.save(user);
+
+        // 6. Create and save the Order
+        Order order = new Order();
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus(OrderStatus.PENDING);
         order.setItems(orderItems);
         order.setTotalPrice(runningTotal);
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
         order.setUser(user);
+
+        // Set the reference to the order on each item
+        for (OrderItem item : orderItems) {
+            item.setOrder(order);
+        }
 
         Order savedOrder = orderRepository.save(order);
 
@@ -143,4 +211,6 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.valueOf(status));
         orderRepository.save(order);
     }
+
+
 }

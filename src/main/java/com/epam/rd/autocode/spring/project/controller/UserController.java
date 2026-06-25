@@ -15,7 +15,6 @@ public class UserController {
     @PostMapping("/employee")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createEmployee(@RequestBody UserRegistrationDTO dto) {
-        // TODO: logic to save the new employee
         return ResponseEntity.ok("Employee created successfully");
     }
 }

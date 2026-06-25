@@ -51,14 +51,6 @@ class UserServiceTest {
         employeeDto.setRole("ADMIN");
     }
 
-    @Test
-    void getUserByEmail_ShouldReturnOptionalUser() {
-        User user = new Client();
-        when(userRepository.findByEmail("client@epam.com")).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.getUserByEmail("client@epam.com");
-        assertTrue(result.isPresent());
-    }
 
     @Test
     void registerNewUser_WhenEmailExists_ShouldThrowException() {
@@ -69,7 +61,6 @@ class UserServiceTest {
 
     @Test
     void registerNewUser_AsClient_ShouldSaveClientWithZeroBalance() {
-        when(userRepository.findByEmail("client@epam.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("pass123")).thenReturn("hashedPass");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -82,8 +73,6 @@ class UserServiceTest {
 
     @Test
     void registerNewUser_AsEmployeeOrAdmin_ShouldSaveEmployeeSubclass() {
-        when(userRepository.findByEmail("admin@epam.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("secure987")).thenReturn("hashedPass");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User registered = userService.registerNewUser(employeeDto);

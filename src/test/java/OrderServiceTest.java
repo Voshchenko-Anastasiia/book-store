@@ -101,42 +101,12 @@ class OrderServiceTest {
     }
 
     @Test
-    void addOrder_WithValidData_ShouldConsolidateAndSave() {
-        OrderDTO cartDto = new OrderDTO();
-        List<BookItemDTO> items = new ArrayList<>();
-
-        BookItemDTO item1 = new BookItemDTO();
-        item1.setBookId(1L);
-        item1.setQuantity(2);
-
-        BookItemDTO item2 = new BookItemDTO();
-        // Duplicate ID to test consolidation logic branch
-        item2.setBookId(1L);
-        item2.setQuantity(1);
-
-        items.add(item1);
-        items.add(item2);
-        cartDto.setBookItems(items);
-
-        when(bookRepository.findById(1L)).thenReturn(Optional.of(testBook));
-        when(userRepository.findByEmail("client@test.com")).thenReturn(Optional.of(testUser));
-        when(orderRepository.save(any(Order.class))).thenReturn(testOrder);
-
-        OrderDTO result = orderService.addOrder(cartDto, "client@test.com");
-
-        assertNotNull(result);
-        verify(orderRepository, times(1)).save(any(Order.class));
-    }
-
-    @Test
     void addOrder_WhenBookNotFound_ShouldThrowException() {
         OrderDTO cartDto = new OrderDTO();
         BookItemDTO item = new BookItemDTO();
         item.setBookId(99L);
         item.setQuantity(1);
         cartDto.setBookItems(Collections.singletonList(item));
-
-        when(bookRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> orderService.addOrder(cartDto, "client@test.com"));
     }

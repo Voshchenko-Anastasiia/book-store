@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.conf;
 
 import com.epam.rd.autocode.spring.project.dto.UserRegistrationDTO;
+import com.epam.rd.autocode.spring.project.exception.UserNotFoundException;
 import com.epam.rd.autocode.spring.project.model.*;
 import com.epam.rd.autocode.spring.project.model.enums.*;
 import com.epam.rd.autocode.spring.project.repo.*;
@@ -114,38 +115,39 @@ public class DatabaseSeeder {
 
         for (int i = 0; i < 5; i++) { // Generate 5 random orders
             String email = clientEmails[random.nextInt(clientEmails.length)];
-            userService.getUserByEmail(email).ifPresent(user -> {
-                Order order = new Order();
-                order.setUser(user);
-                order.setStatus(statuses[random.nextInt(statuses.length)]);
-                order.setOrderDate(LocalDateTime.now().minusDays(random.nextInt(10)));
+            User user = userService.getUserByEmail(email);
+            Order order = new Order();
+            order.setUser(user);
+            order.setStatus(statuses[random.nextInt(statuses.length)]);
+            order.setOrderDate(LocalDateTime.now().minusDays(random.nextInt(10)));
 
-                List<OrderItem> items = new ArrayList<>();
-                BigDecimal total = BigDecimal.ZERO;
+            List<OrderItem> items = new ArrayList<>();
+            BigDecimal total = BigDecimal.ZERO;
 
-                int booksInOrder = random.nextInt(2) + 1;
-                for (int j = 0; j < booksInOrder; j++) {
-                    Book book = allBooks.get(random.nextInt(allBooks.size()));
-                    OrderItem item = new OrderItem();
-                    item.setBook(book);
-                    item.setOrder(order);
-                    item.setQuantity(random.nextInt(2) + 1);
-                    item.setPrice(book.getPrice());
+            int booksInOrder = random.nextInt(2) + 1;
+            for (int j = 0; j < booksInOrder; j++) {
+                Book book = allBooks.get(random.nextInt(allBooks.size()));
+                OrderItem item = new OrderItem();
+                item.setBook(book);
+                item.setOrder(order);
+                item.setQuantity(random.nextInt(2) + 1);
+                item.setPrice(book.getPrice());
 
-                    items.add(item);
-                    total = total.add(book.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
-                }
+                items.add(item);
+                total = total.add(book.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+            }
 
-                order.setItems(items);
-                order.setTotalPrice(total);
+            order.setItems(items);
+            order.setTotalPrice(total);
                 orderRepository.save(order);
-            });
-        }
+            }
         System.out.println("Orders seeded successfully.");
     }
 
     private void createUserIfNotExists(UserService userService, String email, String name, String password, String role) {
-        if (userService.getUserByEmail(email).isEmpty()) {
+        try {
+            userService.getUserByEmail(email);
+        } catch (UserNotFoundException e) {
             UserRegistrationDTO dto = new UserRegistrationDTO();
             dto.setEmail(email);
             dto.setName(name);

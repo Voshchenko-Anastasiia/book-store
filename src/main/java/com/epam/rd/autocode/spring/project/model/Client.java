@@ -12,10 +12,7 @@ import java.math.BigDecimal;
 @Entity
 @NoArgsConstructor
 public class Client extends User {
-    private BigDecimal balance;
-
-    public Client(Long id, String email, String name, String password, BigDecimal balance, String role) {
-        super(id, email, name, password, role);
-        this.balance = balance;
+    public Client(Long id, String email, String name, String password, String role, BigDecimal balance) {
+        super(id, email, name, password, role, balance);
     }
 }

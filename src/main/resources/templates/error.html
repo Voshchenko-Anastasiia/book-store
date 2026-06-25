@@ -1,18 +1,34 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org" lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Application Error</title>
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('System Error')}"></head>
+<body class="bg-light">
 
-<h1>Error <span th:text="${status}">500</span></h1>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<h2>Oops! Something went wrong.</h2>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-lg text-center" style="border-radius: 15px; overflow: hidden;">
 
-<p th:text="${errorMessage}">Error details go here.</p>
+                <div class="card-header border-0 py-4" style="background: var(--purple-gradient);">
+                    <h3 class="mb-0 text-white fw-bold">Oops! Something went wrong.</h3>
+                </div>
 
-<a th:href="@{/books}">Back to Book Catalog</a>
+                <div class="card-body p-5 bg-white">
+                    <h1 class="display-1 fw-bold mb-3" style="color: var(--purple-accent); opacity: 0.5;">
+                        <span th:text="${status} ?: 'Error'"></span>
+                    </h1>
+
+                    <h5 class="text-danger mb-4" th:text="${errorMessage} ?: 'An unexpected error occurred. Please try again.'"></h5>
+
+                    <a href="/" class="btn w-100 py-2" style="background-color: var(--purple-primary); color: white; border-radius: 8px;">
+                        Return to Homepage
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

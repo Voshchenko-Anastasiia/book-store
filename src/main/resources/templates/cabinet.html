@@ -1,33 +1,71 @@
 <!DOCTYPE html>
-<html xmlns:th="https://www.thymeleaf.org">
-<head>
-    <title>My Cabinet</title>
-</head>
-<body>
-<h1>My Orders</h1>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Cabinet')}"></head>
+<body class="bg-light">
 
-<div th:if="${orders.isEmpty()}">
-    <p>You have no orders yet.</p>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+
+        <main class="col-md-10 p-4">
+            <h2 class="mb-4" style="color: var(--purple-primary);">My Cabinet</h2>
+
+            <div class="row">
+                <div class="col-md-5 mb-4">
+                    <div class="card shadow-sm border-0" style="border-radius: 12px;">
+                        <div class="card-body p-4">
+                            <h5 class="card-title text-success mb-3">My Wallet</h5>
+                            <h2 class="display-6 mb-4 fw-bold">
+                                $<span th:text="${user.balance != null ? user.balance : '0.00'}"></span>
+                            </h2>
+
+                            <form th:action="@{/cabinet/top-up}" method="post">
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text bg-white border-end-0">$</span>
+                                    <input type="number" id="amount" name="amount" class="form-control border-start-0" min="1" step="0.01" placeholder="Amount" required>
+                                    <button type="submit" class="btn btn-success px-4">Top Up</button>
+                                </div>
+                            </form>
+
+                            <div th:if="${param.topupSuccess}" class="alert alert-success mt-3 mb-0 border-0 small py-2">
+                                Balance updated successfully!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mb-3 mt-2" style="color: var(--purple-primary);">My Orders</h3>
+
+            <div th:if="${orders.isEmpty()}" class="alert alert-info border-0 shadow-sm" style="background-color: var(--purple-light); color: var(--purple-primary);">
+                You have no orders yet. <a href="/books" class="alert-link fw-bold">Browse books</a>
+            </div>
+
+            <div class="table-responsive shadow-sm" th:if="${!orders.isEmpty()}" style="border-radius: 12px; overflow: hidden;">
+                <table class="table table-hover table-borderless mb-0 align-middle">
+                    <thead style="background-color: var(--purple-primary); color: white;">
+                    <tr>
+                        <th class="p-3">Order ID</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">Date</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                    <tr th:each="order : ${orders}" class="border-bottom">
+                        <td class="p-3 fw-bold text-muted" th:text="${order.id}">123</td>
+                        <td class="p-3">
+                            <span class="badge bg-secondary rounded-pill px-3" th:text="${order.status}">Pending</span>
+                        </td>
+                        <td class="p-3 text-muted" th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">2026-06-21</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
 </div>
 
-<table border="1" th:if="${!orders.isEmpty()}">
-    <thead>
-    <tr>
-        <th>Order ID</th>
-        <th>Status</th>
-        <th>Date</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="order : ${orders}">
-        <td th:text="${order.id}">123</td>
-        <td th:text="${order.status}">Pending</td>
-        <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">2026-06-21</td>
-    </tr>
-    </tbody>
-</table>
-
-<br>
-<a href="/books">Back to Shop</a>
 </body>
 </html>

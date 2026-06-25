@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+
 @Aspect
 @Component
 // requirement: AOP (Aspect-Oriented Programming) for implementing logging
@@ -21,20 +23,22 @@ public class LoggingAspect {
     @Around("serviceMethods()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
         String methodName = joinPoint.getSignature().getName();
+        Object[] args = joinPoint.getArgs(); // Capture inputs
+
+        logger.debug("Entering: {} with args: {}", methodName, Arrays.toString(args));
+
         long startTime = System.currentTimeMillis();
-
         try {
-            logger.debug("Entering: {}", methodName);
-
             Object result = joinPoint.proceed();
-
             long duration = System.currentTimeMillis() - startTime;
-            logger.info("Method {} executed successfully in {} ms", methodName, duration);
 
+            logger.info("Method {} executed successfully in {} ms", methodName, duration);
             return result;
         } catch (Throwable e) {
             logger.error("Exception in method {}! Message: {}", methodName, e.getMessage());
             throw e;
         }
     }
+
+
 }

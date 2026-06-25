@@ -31,7 +31,7 @@ class UserDetailsServiceTest {
         user.setPassword("encodedPassword");
         user.setRole("ROLE_CLIENT");
 
-        when(userService.getUserByEmail("test@epam.com")).thenReturn(Optional.of(user));
+        when(userService.getUserByEmail("test@epam.com")).thenReturn(user);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername("test@epam.com");
 
@@ -44,7 +44,7 @@ class UserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_WhenUserDoesNotExist_ShouldThrowException() {
-        when(userService.getUserByEmail("missing@epam.com")).thenReturn(Optional.empty());
+        when(userService.getUserByEmail("missing@epam.com")).thenReturn(null);
 
         assertThrows(UsernameNotFoundException.class,
                 () -> userDetailsService.loadUserByUsername("missing@epam.com"));

@@ -1,6 +1,7 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.dto.UserRegistrationDTO;
+import com.epam.rd.autocode.spring.project.exception.UserNotFoundException;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.Order;
@@ -8,16 +9,18 @@ import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.repo.OrderRepository;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 // requirement: Spring Security - authentication strategies (Database-backed Authentication)
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -31,17 +34,18 @@ public class UserServiceImpl implements UserService {
         this.orderRepository = orderRepository;
     }
 
-    // requirement: Spring Data JPA - implementation of custom queries through service contracts
     @Override
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     @Override
     public User registerNewUser(UserRegistrationDTO dto) {
-//        if (getUserByEmail(dto.getEmail()).isPresent()) {
-//            throw new IllegalArgumentException("An account with this email already exists.");
-//        }
+
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("User with this email already exists");
+        }
 
         User user;
         String cleanRole = dto.getRole().toUpperCase().replace("ROLE_", "");
@@ -57,6 +61,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(cleanRole);
+        user.setBalance(BigDecimal.ZERO);
 
         return userRepository.save(user);
     }
@@ -89,5 +94,26 @@ public class UserServiceImpl implements UserService {
         dto.setRole(user.getRole());
         dto.setPassword("********");
         return dto;
+    }
+
+    @Transactional
+    public void topUpBalance(String email, BigDecimal amount) {
+        try {
+            log.info("BUSINESS EVENT: Processing top-up of {} for user: {}", amount, email);
+
+            User user = userRepository.findByEmail(email).orElseThrow();
+            user.setBalance(user.getBalance().add(amount));
+            userRepository.save(user);
+
+            log.info("BUSINESS EVENT: Top-up successful for user: {}", email);
+
+        } catch (Exception e) {
+            log.error("ERROR: Failed to top up balance for user {}. Reason: {}", email, e.getMessage());
+            throw e;
+        }
+    }
+
+    public User reloadUser(Long id) {
+        return userRepository.findById(id).orElseThrow();
     }
 }

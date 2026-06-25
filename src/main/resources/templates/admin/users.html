@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(title='Manage Users')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <aside th:replace="~{fragments/layout :: admin-sidebar}"></aside>
+
+        <main class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 style="color: var(--purple-primary);">User Management</h2>
+                <a th:href="@{/admin/users/create}" class="btn btn-success px-4" style="border-radius: 8px;">
+                    ➕ Create Employee
+                </a>
+            </div>
+
+            <div th:if="${param.success}" class="alert alert-success border-0 shadow-sm py-2">
+                New employee workspace account provisioned successfully!
+            </div>
+            <hr class="text-muted">
+
+            <div class="table-responsive shadow-sm mt-4" style="border-radius: 12px; overflow: hidden;">
+                <table class="table table-hover table-borderless bg-white mb-0 align-middle">
+                    <thead style="background-color: var(--purple-primary); color: white;">
+                    <tr>
+                        <th class="p-3">Email</th>
+                        <th class="p-3">Name</th>
+                        <th class="p-3">Role</th>
+                        <th class="p-3 text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users}" class="border-bottom">
+                        <td class="p-3 fw-semibold text-dark" th:text="${user.email}">user@example.com</td>
+                        <td class="p-3 text-secondary" th:text="${user.name}">John Doe</td>
+                        <td class="p-3">
+                            <span class="badge rounded-pill px-3 py-1"
+                                  th:classappend="${user.role == 'ADMIN' ? 'bg-danger' : (user.role == 'EMPLOYEE' ? 'bg-warning text-dark' : 'bg-secondary')}"
+                                  th:text="${user.role}">CLIENT</span>
+                        </td>
+                        <td class="p-3 text-center">
+                            <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post"
+                                  onsubmit="return confirm('Are you sure you want to permanently delete this account?');" class="d-inline-block">
+                                <button type="submit" class="btn btn-sm btn-outline-danger px-3" style="border-radius: 6px;">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

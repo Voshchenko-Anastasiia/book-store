@@ -59,8 +59,14 @@
 </nav>
 
 <aside th:fragment="sidebar" class="col-md-2 sidebar-purple p-4" style="min-height: 85vh;">
-    <h5 class="text-uppercase small mb-3" th:text="#{nav.cabinet}">Cabinet Menu</h5>
-    <hr class="text-muted">
+    <h5 class="text-uppercase small mb-1" th:text="#{nav.cabinet}">Cabinet Menu</h5>
+
+    <div class="mb-3" th:if="${user != null}">
+        <span class="text-muted small">Wallet:</span>
+        <span class="fw-bold text-success">$<span th:text="${user.balance != null ? user.balance : '0.00'}"></span></span>
+    </div>
+
+    <hr class="text-muted mt-1">
     <ul class="nav flex-column gap-2">
         <li class="nav-item">
             <a class="nav-link btn text-start border-0 nav-link-custom" href="/cabinet">📊 Dashboard</a>

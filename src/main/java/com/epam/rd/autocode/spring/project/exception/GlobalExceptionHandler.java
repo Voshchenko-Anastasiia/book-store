@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,13 +22,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BaseProjectException.class)
-    public String handleBusinessExceptions(BaseProjectException ex,
-                                           Locale locale,
-                                           Model model,
-                                           HttpServletResponse response) {
-
+    public String handleBusinessExceptions(BaseProjectException ex, Locale locale, Model model, HttpServletResponse response) {
         String localizedMessage = messageSource.getMessage(ex.getMessageKey(), ex.getArgs(), locale);
-
         logger.warn("Business rule violation [{}]: {}", ex.getHttpStatus(), localizedMessage);
 
         response.setStatus(ex.getHttpStatus().value());
@@ -37,12 +33,21 @@ public class GlobalExceptionHandler {
         return "error";
     }
 
-    @ExceptionHandler(Exception.class)
-    public String handleGenericException(Exception ex,
-                                         Locale locale,
-                                         Model model,
-                                         HttpServletResponse response) {
+    @ExceptionHandler(AccessDeniedException.class)
+    public String handleAccessDeniedException(AccessDeniedException ex, Locale locale, Model model, HttpServletResponse response) {
+        logger.warn("Security violation - Access Denied: {}", ex.getMessage());
 
+        String localizedMessage = messageSource.getMessage("error.access.denied", null, "You do not have permission to view this page.", locale);
+
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        model.addAttribute("errorMessage", localizedMessage);
+        model.addAttribute("status", 403);
+
+        return "error";
+    }
+
+    @ExceptionHandler(Exception.class)
+    public String handleGenericException(Exception ex, Locale locale, Model model, HttpServletResponse response) {
         logger.error("Unexpected error occurred: ", ex);
 
         String localizedMessage = messageSource.getMessage("error.unexpected", null, locale);
